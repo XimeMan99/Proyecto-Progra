@@ -71,6 +71,7 @@ ALTER TABLE estado_documento
     ADD CONSTRAINT estado_documento_documento_fk FOREIGN KEY ( documento_cod_documento )
         REFERENCES documento ( cod_documento ) ON DELETE CASCADE
 ;
+
 INSERT INTO tipo_alumno (nombre) 
 	VALUES ('Estudiante'),('Auxiliar');
 
