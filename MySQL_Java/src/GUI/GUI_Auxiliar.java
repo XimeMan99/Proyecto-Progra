@@ -9,6 +9,7 @@ import Clases.Curso;
 import Clases.Documento;
 import Clases.EstadoDocumento;
 import Clases.Mensaje;
+import Clases.ObjetoPerdido;
 import MySQL.Consultas;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,6 +30,7 @@ public class GUI_Auxiliar extends javax.swing.JFrame implements ActionListener{
      * Creates new form GUI_Auxiliar
      */
     ArrayList<Mensaje> mensajes;
+    ArrayList<ObjetoPerdido> objetos;
     
     public GUI_Auxiliar() {
         initComponents();
@@ -37,6 +39,20 @@ public class GUI_Auxiliar extends javax.swing.JFrame implements ActionListener{
         strip_subirDocumento.setVisible(false);
         lbl_bienvenida.setText("Bienvenido "+Consultas.alumno_Loggeado.getNombre()+"!");
         ConsultarAux();
+        CARGAR_OBJETOS_PERDIDOS();
+    }
+    
+    public void CARGAR_OBJETOS_PERDIDOS()
+    {
+        objetos = new ArrayList<>();
+        objetos = Consultas.ObtenerObjetosNOReclamados();
+        strip_objetos.removeAll();
+        for (ObjetoPerdido objeto:objetos) {
+            JMenuItem item = new JMenuItem(objeto.detalles);
+            item.addActionListener(this);
+            strip_objetos.add(item);
+            objeto.item = item;
+        }
     }
     
     private void ConsultarAux()
@@ -85,6 +101,7 @@ public class GUI_Auxiliar extends javax.swing.JFrame implements ActionListener{
         strip_subirDocumento = new javax.swing.JMenuItem();
         strip_seleccionarCurso = new javax.swing.JMenuItem();
         strip_bandejaEntrada = new javax.swing.JMenu();
+        strip_objetos = new javax.swing.JMenu();
         jMenu1 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -122,6 +139,9 @@ public class GUI_Auxiliar extends javax.swing.JFrame implements ActionListener{
 
         strip_bandejaEntrada.setText("Bandeja de Entrada");
         jMenuBar1.add(strip_bandejaEntrada);
+
+        strip_objetos.setText("Objetos Perdidos");
+        jMenuBar1.add(strip_objetos);
 
         jMenu1.setText("Cerrar Sesión");
         jMenu1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -232,13 +252,16 @@ public class GUI_Auxiliar extends javax.swing.JFrame implements ActionListener{
     private javax.swing.JLabel lbl_bienvenida;
     private javax.swing.JMenu strip_bandejaEntrada;
     private javax.swing.JMenu strip_curso;
+    private javax.swing.JMenu strip_objetos;
     private javax.swing.JMenuItem strip_seleccionarCurso;
     private javax.swing.JMenuItem strip_subirDocumento;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        for (Mensaje mensaje : mensajes) {
+        if(mensajes != null)
+        {
+            for (Mensaje mensaje : mensajes) {
             if((e.getSource().equals(mensaje.getMenuItem())))
             {
                 JOptionPane.showMessageDialog(null, "Alumno: "+
@@ -250,6 +273,33 @@ public class GUI_Auxiliar extends javax.swing.JFrame implements ActionListener{
                 
                 Consultas.MarcarLeido(mensaje.getEstado());
             }
+        }
+        }
+        
+        if(objetos != null)
+        {
+            for(ObjetoPerdido objeto: objetos)
+        {
+            if(e.getSource().equals(objeto.item))
+            {
+                switch (JOptionPane.showConfirmDialog(null, "Objeto: "+objeto.detalles+
+                        "\nLugar encontrado: "+objeto.lugar+
+                        "\nFecha encontrado: "+objeto.fecha+
+                        "\n\nMarcar como tuyo?", "Objeto Perdido", JOptionPane.YES_NO_CANCEL_OPTION)) {
+                    case JOptionPane.CANCEL_OPTION:
+                        break;
+                    case JOptionPane.YES_OPTION:
+                        Consultas.MarcarReclamo(objeto);
+                        JOptionPane.showMessageDialog(null, "Objeto reclamado con éxito!");
+                        CARGAR_OBJETOS_PERDIDOS();
+                        break;
+                    case JOptionPane.NO_OPTION:
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
         }
     }
 }

@@ -137,17 +137,16 @@ public class GUI_Login extends javax.swing.JFrame {
                     gui.show();
                     this.dispose();
                     break;
+                case 3://administrador
+                    GUI_Administrador guiii = new GUI_Administrador();
+                    guiii.show();
+                    this.dispose();
+                    break;
             }
             return;
         }
         JOptionPane.showMessageDialog(null, "No se encontró el usuario especificado\nIntentelo de nuevo");
         LimpiarCampos();
-        
-        double num = 1.0;
-        while (num!=0.0) {            
-            num = num - 0.1;
-            System.out.println(num);
-        }
     }//GEN-LAST:event_btn_iniciarSesionActionPerformed
 
     private void LimpiarCampos()

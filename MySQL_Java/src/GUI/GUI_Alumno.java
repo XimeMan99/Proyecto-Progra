@@ -10,6 +10,7 @@ import Clases.Curso;
 import Clases.Documento;
 import Clases.EstadoDocumento;
 import Clases.Mensaje;
+import Clases.ObjetoPerdido;
 import MySQL.Consultas;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,6 +29,7 @@ public class GUI_Alumno extends javax.swing.JFrame implements ActionListener{
      */
     
     ArrayList<Mensaje> mensajes;
+    ArrayList<ObjetoPerdido> objetos;
     
     public GUI_Alumno() {
         initComponents();
@@ -40,6 +42,20 @@ public class GUI_Alumno extends javax.swing.JFrame implements ActionListener{
         lbl_bienvenida.setText("Bienvenido "+Consultas.alumno_Loggeado.getNombre()+"!");
         
         CARGAR_BANDEJA_DE_ENTRADA();
+        CARGAR_OBJETOS_PERDIDOS();
+    }
+    
+    public void CARGAR_OBJETOS_PERDIDOS()
+    {
+        objetos = new ArrayList<>();
+        objetos = Consultas.ObtenerObjetosNOReclamados();
+        strip_objetos.removeAll();
+        for (ObjetoPerdido objeto:objetos) {
+            JMenuItem item = new JMenuItem(objeto.detalles);
+            item.addActionListener(this);
+            strip_objetos.add(item);
+            objeto.item = item;
+        }
     }
     
     public void CARGAR_BANDEJA_DE_ENTRADA()
@@ -81,6 +97,7 @@ public class GUI_Alumno extends javax.swing.JFrame implements ActionListener{
         btn_seleccionar = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         stripBandejaEntrada = new javax.swing.JMenu();
+        strip_objetos = new javax.swing.JMenu();
         jMenu3 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -103,6 +120,9 @@ public class GUI_Alumno extends javax.swing.JFrame implements ActionListener{
 
         stripBandejaEntrada.setText("Bandeja de Entrada");
         jMenuBar1.add(stripBandejaEntrada);
+
+        strip_objetos.setText("Objetos Perdidos");
+        jMenuBar1.add(strip_objetos);
 
         jMenu3.setText("Cerrar Sesion");
         jMenu3.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -213,11 +233,14 @@ public class GUI_Alumno extends javax.swing.JFrame implements ActionListener{
     private javax.swing.JLabel lbl_bienvenida;
     private javax.swing.JLabel lbl_bienvenida1;
     private javax.swing.JMenu stripBandejaEntrada;
+    private javax.swing.JMenu strip_objetos;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        for (Mensaje mensaje : mensajes) {
+        if(mensajes != null)
+        {
+            for (Mensaje mensaje : mensajes) {
             if((e.getSource().equals(mensaje.getMenuItem())))
             {
                 JOptionPane.showMessageDialog(null, "Curso: "+
@@ -226,6 +249,33 @@ public class GUI_Alumno extends javax.swing.JFrame implements ActionListener{
                 
                 Consultas.MarcarLeido(mensaje.getEstado());
             }
+        }
+        }
+        
+        if(objetos != null)
+        {
+            for(ObjetoPerdido objeto: objetos)
+        {
+            if(e.getSource().equals(objeto.item))
+            {
+                switch (JOptionPane.showConfirmDialog(null, "Objeto: "+objeto.detalles+
+                        "\nLugar encontrado: "+objeto.lugar+
+                        "\nFecha encontrado: "+objeto.fecha+
+                        "\n\nMarcar como tuyo?", "Objeto Perdido", JOptionPane.YES_NO_CANCEL_OPTION)) {
+                    case JOptionPane.CANCEL_OPTION:
+                        break;
+                    case JOptionPane.YES_OPTION:
+                        Consultas.MarcarReclamo(objeto);
+                        JOptionPane.showMessageDialog(null, "Objeto reclamado con éxito!");
+                        CARGAR_OBJETOS_PERDIDOS();
+                        break;
+                    case JOptionPane.NO_OPTION:
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
         }
     }
 }

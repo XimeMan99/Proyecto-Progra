@@ -29,6 +29,41 @@ public class Consultas {
         }
     }
     
+    public static ObjetoPerdido ObtenerObjeto(int cod_objeto) throws SQLException
+    {
+        ObjetoPerdido objeto = null;
+        Connection con = ConexionMySQL.conectarMySQL();
+        Statement cmd = con.createStatement(); 
+        ResultSet reader = cmd.executeQuery ("select * from objeto_perdido where cod_objeto = "+cod_objeto);
+        
+        while (reader.next()) 
+        { 
+            objeto = new ObjetoPerdido();
+            objeto.detalles = reader.getString("nombre");
+            objeto.lugar = reader.getString("lugar");
+            objeto.fecha = reader.getDate("fecha").toString();
+            objeto.alumno_cod_alumno = reader.getInt("alumno_cod_alumno");
+        }
+        
+        return objeto;
+    }
+    
+    public static void SubirObjeto(ObjetoPerdido objeto) throws SQLException
+    {
+        try{
+            Date date = Date.valueOf(objeto.fecha);
+        }
+        catch(Exception e)
+        {
+            JOptionPane.showMessageDialog(null, "Error al convertir el tipo fecha\nintentelo de nuevo");
+            return;
+        }
+        Connection con = ConexionMySQL.conectarMySQL();
+        Statement cmd = con.createStatement(); 
+        cmd.executeUpdate("INSERT INTO objeto_perdido(nombre, lugar, fecha, alumno_cod_alumno) VALUES"
+                + "('"+objeto.detalles+"','"+objeto.lugar+"','"+objeto.fecha+"',0)" );
+    }
+    
     public static void MarcarLeido(EstadoDocumento estado)
     {
         Connection con = ConexionMySQL.conectarMySQL();
@@ -424,5 +459,66 @@ public class Consultas {
             System.out.println(e);
         }
         return alumno;
+    }
+    
+    public static void MarcarReclamo(ObjetoPerdido objeto)
+    {
+        Connection con = ConexionMySQL.conectarMySQL();
+        try{
+            Statement cmd = con.createStatement(); 
+            cmd.executeUpdate("update objeto_perdido set alumno_cod_alumno = "+alumno_Loggeado.getCod_alumno() + " and "
+                    + "cod_objeto ="+objeto.cod_objeto);
+        }
+        catch(SQLException e){
+            System.out.println(e);
+        }
+    }
+    
+    public static ArrayList<ObjetoPerdido> ObtenerObjetosReclamados() {
+        ArrayList<ObjetoPerdido> objetos = new ArrayList<>();
+        Connection con = ConexionMySQL.conectarMySQL();
+        try{
+            Statement cmd = con.createStatement(); 
+            ResultSet reader = cmd.executeQuery ("select * from objeto_perdido where alumno_cod_alumno !=0");
+            ObjetoPerdido objeto;
+            while (reader.next()) 
+            { 
+                objeto = new ObjetoPerdido();
+                objeto.cod_objeto = reader.getInt("cod_objeto");
+                objeto.alumno_cod_alumno = reader.getInt("alumno_cod_alumno");
+                objeto.detalles = reader.getString("nombre");
+                objeto.fecha = reader.getDate("fecha").toString();
+                objeto.lugar = reader.getString("lugar");
+                objetos.add(objeto);
+            }
+        }
+        catch(SQLException e){
+            System.out.println(e);
+        }
+        return objetos;
+    }
+
+    public static ArrayList<ObjetoPerdido> ObtenerObjetosNOReclamados() {
+        ArrayList<ObjetoPerdido> objetos = new ArrayList<>();
+        Connection con = ConexionMySQL.conectarMySQL();
+        try{
+            Statement cmd = con.createStatement(); 
+            ResultSet reader = cmd.executeQuery ("select * from objeto_perdido where alumno_cod_alumno =0");
+            ObjetoPerdido objeto;
+            while (reader.next()) 
+            { 
+                objeto = new ObjetoPerdido();
+                objeto.cod_objeto = reader.getInt("cod_objeto");
+                objeto.alumno_cod_alumno = reader.getInt("alumno_cod_alumno");
+                objeto.detalles = reader.getString("nombre");
+                objeto.fecha = reader.getDate("fecha").toString();
+                objeto.lugar = reader.getString("lugar");
+                objetos.add(objeto);
+            }
+        }
+        catch(SQLException e){
+            System.out.println(e);
+        }
+        return objetos;
     }
 }

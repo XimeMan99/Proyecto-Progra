@@ -34,6 +34,11 @@
             <Property name="text" type="java.lang.String" value="Bandeja de Entrada"/>
           </Properties>
         </Menu>
+        <Menu class="javax.swing.JMenu" name="strip_objetos">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Objetos Perdidos"/>
+          </Properties>
+        </Menu>
         <Menu class="javax.swing.JMenu" name="jMenu1">
           <Properties>
             <Property name="text" type="java.lang.String" value="Cerrar Sesi&#xf3;n"/>
